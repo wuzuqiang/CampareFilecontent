@@ -1,29 +1,21 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="PayTypeDayReport.aspx.cs"
-    Inherits="KT.Parking.Cost.KT_Report.PayTypeDayReport" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="PayTypeDayReport.aspx.cs" Inherits="KT.Parking.Cost.KT_Report.PayTypeDayReport" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
 <head runat="server">
     <title>停车场支付方式日报表</title>
     <link href="../../KT_Css/ext-all.css" rel="stylesheet" type="text/css" />
     <link href="../../KT_Css/ColumnHeaderGroup.css" rel="stylesheet" type="text/css" />
-
     <script src="../../KT_JavaScript/Global.js" type="text/javascript"></script>
-
     <script src="../../KT_JavaScript/ext-base.js" type="text/javascript"></script>
-
-    <script src="../../KT_JavaScript/ext-all.js" type="text/javascript"></script>
-
+    <script src="../../KT_JavaScript/ext-all.js" type="text/javascript"></script>   
     <script src="../../KT_JavaScript/m3type.js" type="text/javascript"></script>
-
     <script src="../../KT_JavaScript/ext-lang-zh_CN.js" type="text/javascript"></script>
-
     <script src="../../KT_JavaScript/GridSummary.js" type="text/javascript"></script>
-
     <script src="../../KT_JavaScript/ColumnHeaderGroup.js" type="text/javascript"></script>
-
     <script src="../../KT_JavaScript/DatePicker/WdatePicker.js" type="text/javascript"></script>
-
+    
     <script type="text/javascript">
         Ext.onReady(function() {
             /*查询框控件*/
@@ -105,7 +97,10 @@
             var data = [];
             var start = 0;
             var limit = parseInt(ddlLimit.getValue());
-            var fields = ["id","PayDate","TollMoney","TollWeChat","TollAlipay","TollPos","TollCardFee","TollTicket","ExitMoney","ExitWeChat","ExitAlipay","ExitPos","ExitCardFee","ExitTicket","CenterMoney","CenterWeChat","CenterAlipay","CenterPos","CenterTicket","SelfMoney","SelfWeChat","SelfAlipay","SelfPos","SelfTicket","KeyTopWeChat","KeyTopAlipay","KeyTopPos","BackMoney","ThirdMoney","AbnormalCount","FreeCount","SumMoney","SumWeChat","SumAlipay","SumPos","SumCardFee","SumTicket","TotalMoney","CarCardFee","ChargeFee","SellerCharge"];
+            var fields = ["id", "PayDate", "TotalMoney", "TollCount", "TollPercent", "TollMoney", "CenterCount", "CenterPercent", "CenterMoney",
+                "SelfCount", "SelfPercent", "SelfMoney", "SellerCount", "SellerPercent", "SellerMoney", "AppCount", "AppPercent", "AppMoney",
+                "WeChatCount", "WeChatPercent", "WeChatMoney", "AfterCount", "AfterPercent", "AfterMoney", "OtherCount", "OtherPercent", "OtherMoney"
+            ];
             ds = new Ext.data.Store({
                 proxy: new Ext.data.HttpProxy(
                     {
@@ -131,79 +126,55 @@
                 return v;
             }
             function TransDate(v, m) {
-//                v = v.replace('0:00:00', '');
+                v = v.replace('0:00:00', '');
                 return ColumnsTip(v, m);
             }
             function TransPercent(v, m) {
-//                v = parseFloat(v * 100).toFixed(2) + '%';
+                v = parseFloat(v * 100).toFixed(2) + '%';
                 return ColumnsTip(v, m);
             }
-            function TransCount(v, m) {
-                return v+" 辆";
-            };
-            function ColCount(v, m) {
-                v = v+" 辆";
-                return ColumnsTip(v, m);
-            };
             function RMBMoney(v, m) {
-                v = v+" 元";
+                v = parseFloat(v).toFixed(2);
                 return ColumnsTip(v, m);
             };
             function TransTotal(v) {
-                return v+" 元";
-//                return parseFloat(v).toFixed(2);
+                return parseFloat(v).toFixed(2);
             };
 
             //多行表头
-            var firstTitle = [{ colspan: 2, align: 'center'},{ header: '岗亭缴费(元)', colspan: 6, align: 'center' }, { header: '出口缴费机（元）', colspan: 6, align: 'center' }, { header: '中央缴费（元）', colspan: 5, align: 'center' }, { header: '场内缴费机(元)', colspan: 5, align: 'center' }, { header: '手机APP', colspan: 3, align: 'center' }, { header: '后付费(元)', align: 'center' }, { header: '第三方对接(元)', align: 'center' }, { header: '异常放行', align: 'center' }, { header: '免费放行', align: 'center' }, { header: '固定车收入', colspan: 2, align: 'center' }, { header: '商家充值', align: 'center' }, { header: '小计', colspan: 6, align: 'center' }, { header: '合计(元)', align: 'center' }];
-
-            
+            var firstTitle = [{}, {}, {}, { header: '岗亭缴费(元)', colspan: 3, align: 'center' }, { header: '中央缴费(元)', colspan: 3, align: 'center' }, { header: '自助缴费(元)', colspan: 3, align: 'center' }, { header: '商家缴费(元)', colspan: 3, align: 'center' }, { header: '安卓APP(元)', colspan: 3, align: 'center' }, { header: '微信(元)', colspan: 3, align: 'center' }, { header: '后付费(元)', colspan: 3, align: 'center' }, { header: '第三方缴费(元)', colspan: 3, align: 'center'}];
             var group = new Ext.ux.grid.ColumnHeaderGroup({
                 rows: [firstTitle]
             });
 
             var cm = new Ext.grid.ColumnModel([
-                { align: 'right' , header: "编号", width: 50, dataIndex: 'id', renderer: ColumnsTip, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">合计：</span>'; } },
-                { align: 'right' , header: "日期", width: 100, dataIndex: 'PayDate', renderer: TransDate, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">—</span>'; } },
-                { align: 'right' , header: "现金", width: 100, dataIndex: 'TollMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum1) + '</span>'; } },
-                { align: 'right' , header: "微信扫码", width: 100, dataIndex: 'TollWeChat', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum2) + '</span>'; } },
-                { align: 'right' , header: "支付宝扫码", width: 100, dataIndex: 'TollAlipay', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum3) + '</span>'; } },
-                { align: 'right' , header: "POS支付", width: 100, dataIndex: 'TollPos', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum4) + '</span>'; } },
-                { align: 'right' , header: "充值车扣费", width: 100, dataIndex: 'TollCardFee', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum5) + '</span>'; } },
-                { align: 'right' , header: "抵用券", width: 100, dataIndex: 'TollTicket', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum6) + '</span>'; } },
-                { align: 'right' , header: "现金", width: 100, dataIndex: 'ExitMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum7) + '</span>'; } },
-                { align: 'right' , header: "微信扫码", width: 100, dataIndex: 'ExitWeChat', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum8) + '</span>'; } },
-                { align: 'right' , header: "支付宝扫码", width: 100, dataIndex: 'ExitAlipay', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum9) + '</span>'; } },
-                { align: 'right' , header: "POS支付", width: 100, dataIndex: 'ExitPos', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum10) + '</span>'; } },
-                { align: 'right' , header: "充值车扣费", width: 100, dataIndex: 'ExitCardFee', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum11) + '</span>'; } },
-                { align: 'right' , header: "抵用券", width: 100, dataIndex: 'ExitTicket', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum12) + '</span>'; } },
-                { align: 'right' , header: "现金", width: 100, dataIndex: 'CenterMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum13) + '</span>'; } },
-                { align: 'right' , header: "微信", width: 100, dataIndex: 'CenterWeChat', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum14) + '</span>'; } },
-                { align: 'right' , header: "支付宝", width: 100, dataIndex: 'CenterAlipay', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum15) + '</span>'; } },
-                { align: 'right' , header: "POS支付", width: 100, dataIndex: 'CenterPos', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum16) + '</span>'; } },
-                { align: 'right' , header: "抵用券", width: 100, dataIndex: 'CenterTicket', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum17) + '</span>'; } },
-                { align: 'right' , header: "现金", width: 100, dataIndex: 'SelfMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum18) + '</span>'; } },
-                { align: 'right' , header: "微信扫码", width: 100, dataIndex: 'SelfWeChat', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum19) + '</span>'; } },
-                { align: 'right' , header: "支付宝扫码", width: 100, dataIndex: 'SelfAlipay', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum20) + '</span>'; } },
-                { align: 'right' , header: "POS支付", width: 100, dataIndex: 'SelfPos', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum21) + '</span>'; } },
-                { align: 'right' , header: "抵用券", width: 100, dataIndex: 'SelfTicket', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum22) + '</span>'; } },
-                { align: 'right' , header: "微信", width: 100, dataIndex: 'KeyTopWeChat', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum23) + '</span>'; } },
-                { align: 'right' , header: "支付宝", width: 100, dataIndex: 'KeyTopAlipay', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum24) + '</span>'; } },
-                { align: 'right' , header: "银联", width: 100, dataIndex: 'KeyTopPos', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum25) + '</span>'; } },
-                { align: 'right' , header: "金额", width: 100, dataIndex: 'BackMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum26) + '</span>'; } },
-                { align: 'right' , header: "金额", width: 100, dataIndex: 'ThirdMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum27) + '</span>'; } },
-                { align: 'right' , header: "辆", width: 100, dataIndex: 'AbnormalCount', renderer: ColCount, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransCount(ds.reader.jsonData.Sum28) + '</span>'; } },
-                { align: 'right' , header: "辆", width: 100, dataIndex: 'FreeCount', renderer: ColCount, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransCount(ds.reader.jsonData.Sum29) + '</span>'; } },
-                { align: 'right' , header: "固定车", width: 100, dataIndex: 'CarCardFee', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum36) + '</span>'; } },
-                { align: 'right' , header: "充值车", width: 100, dataIndex: 'ChargeFee', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum37) + '</span>'; } },
-                { align: 'right' , header: "金额", width: 100, dataIndex: 'SellerCharge', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum38) + '</span>'; } },
-                { align: 'right' , header: "现金", width: 100, dataIndex: 'SumMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum30) + '</span>'; } },
-                { align: 'right' , header: "微信", width: 100, dataIndex: 'SumWeChat', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum31) + '</span>'; } },
-                { align: 'right' , header: "支付宝", width: 100, dataIndex: 'SumAlipay', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum32) + '</span>'; } },
-                { align: 'right' , header: "POS支付", width: 100, dataIndex: 'SumPos', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum33) + '</span>'; } },
-                { align: 'right' , header: "充值车扣费", width: 100, dataIndex: 'SumCardFee', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum34) + '</span>'; } },
-                { align: 'right' , header: "抵用券", width: 100, dataIndex: 'SumTicket', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum35) + '</span>'; } },                
-                { align: 'right' , header: "", width: 100, dataIndex: 'TotalMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum39) + '</span>'; } }
+                { header: "编号", width: 50, dataIndex: 'id', renderer: ColumnsTip, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">合计：</span>'; } },
+                { header: "日期", width: 100, dataIndex: 'PayDate', renderer: TransDate, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">—</span>'; } },
+                { header: "合计(元)", width: 100, dataIndex: 'TotalMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum1) + '</span>'; } },
+                { header: "缴费次数", width: 100, dataIndex: 'TollCount', renderer: ColumnsTip, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + ds.reader.jsonData.Sum2 + '</span>'; } },
+                { header: "占比", width: 100, dataIndex: 'TollPercent', renderer: TransPercent, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">—</span>'; } },
+                { header: "实收金额", width: 100, dataIndex: 'TollMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum3) + '</span>'; } },
+                { header: "缴费次数", width: 100, dataIndex: 'CenterCount', renderer: ColumnsTip, sortable: false, summaryRenderer: function(v, params, data) { return '<span style="color:green;font-weight:bold;">' + ds.reader.jsonData.Sum4 + '</span>'; } },
+                { header: "占比", width: 100, dataIndex: 'CenterPercent', renderer: TransPercent, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">—</span>'; } },
+                { header: "实收金额", width: 100, dataIndex: 'CenterMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum5) + '</span>'; } },
+                { header: "缴费次数", width: 100, dataIndex: 'SelfCount', renderer: ColumnsTip, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + ds.reader.jsonData.Sum6 + '</span>'; } },
+                { header: "占比", width: 100, dataIndex: 'SelfPercent', renderer: TransPercent, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">—</span>'; } },
+                { header: "实收金额", width: 100, dataIndex: 'SelfMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum7) + '</span>'; } },
+                { header: "次数", width: 100, dataIndex: 'SellerCount', renderer: ColumnsTip, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + ds.reader.jsonData.Sum8 + '</span>'; } },
+                { header: "占比", width: 100, dataIndex: 'SellerPercent', renderer: TransPercent, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">—</span>'; } },
+                { header: "金额(元)", width: 100, dataIndex: 'SellerMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum9) + '</span>'; } },
+                { header: "次数", width: 100, dataIndex: 'AppCount', renderer: ColumnsTip, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + ds.reader.jsonData.Sum10 + '</span>'; } },
+                { header: "占比", width: 100, dataIndex: 'AppPercent', renderer: TransPercent, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">—</span>'; } },
+                { header: "金额(元)", width: 100, dataIndex: 'AppMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum11) + '</span>'; } },
+                { header: "次数", width: 100, dataIndex: 'WeChatCount', renderer: ColumnsTip, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + ds.reader.jsonData.Sum12 + '</span>'; } },
+                { header: "占比", width: 100, dataIndex: 'WeChatPercent', renderer: TransPercent, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">—</span>'; } },
+                { header: "金额(元)", width: 100, dataIndex: 'WeChatMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum13) + '</span>'; } },
+                { header: "次数", width: 100, dataIndex: 'AfterCount', renderer: ColumnsTip, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + ds.reader.jsonData.Sum14 + '</span>'; } },
+                { header: "占比", width: 100, dataIndex: 'AfterPercent', renderer: TransPercent, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">—</span>'; } },
+                { header: "金额(元)", width: 100, dataIndex: 'AfterMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum15) + '</span>'; } },
+                { header: "次数", width: 100, dataIndex: 'OtherCount', renderer: ColumnsTip, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + ds.reader.jsonData.Sum16 + '</span>'; } },
+                { header: "占比", width: 100, dataIndex: 'OtherPercent', renderer: TransPercent, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">—</span>'; } },
+                { header: "金额(元)", width: 100, dataIndex: 'OtherMoney', renderer: RMBMoney, sortable: false, summaryRenderer: function(v) { return '<span style="color:green;font-weight:bold;">' + TransTotal(ds.reader.jsonData.Sum17) + '</span>'; } }
             ]);
 
             //数据显示
@@ -226,12 +197,12 @@
                         {
                             iconCls: 'icon-Export',
                             text: '导出',
-//                            disabled: E ? true : false,
+                            disabled: E ? true : false,
                             handler: function() { ExportExcel(); }
                         }, "-",
                         {
                             iconCls: 'icon-search',
-//                            disabled: S ? true : false,
+                            disabled: S ? true : false,
                             text: '查询',
                             handler: function() { Search(); }
                         }
@@ -268,30 +239,30 @@
                 var EndDate = txtEndTime.getValue();
                 var DataType = ddlDataType.getValue();
 
-//                filerStr = " 1=1 ";
-//                if (StartDate != "" && StartDate != undefined) {
-//                    filerStr += " and a.outTime &gt;= '" + StartDate + "'";
-//                }
-//                if (EndDate != "" && EndDate != undefined) {
-//                    filerStr += " and a.outTime &lt;= '" + EndDate + "'";
-//                }
+                filerStr = " 1=1 ";
+                if (StartDate != "" && StartDate != undefined) {
+                    filerStr += " and a.outTime &gt;= '" + StartDate + "'";
+                }
+                if (EndDate != "" && EndDate != undefined) {
+                    filerStr += " and a.outTime &lt;= '" + EndDate + "'";
+                }
 
-                var result = GetName("", "<QUERY><![CDATA[" + filerStr + "]]></QUERY><MONTH>" + StartDate + "</MONTH><TYPES>" + DataType + "</TYPES>", "ExportExcelPayTypeDayReport", "type");
-                if (result.indexOf("xlsx") > -1 || result.indexOf("xls") > -1) {
-                    var src = "/KT_Admin/CarNoManage/DownFile.aspx?type=type&fp=/KT_Admin/TempFiles/ExportFiles/" + escape(result);
+                var result = GetName("", "<QUERY>" + filerStr + "</QUERY><MONTH>" + StartDate + "</MONTH><TYPES>" + DataType + "</TYPES>", "ExportExcelPayTypeDayReport", "type");
+                if ((result.indexOf("xlsx") || result.indexOf("xls")) && result != "soap:server") {
+                    var src = "../KT_Admin/CarNoManage/DownFile.aspx?type=type&fp=../TempFiles/ExportFiles/" + escape(result);
                     downFile(src);
                 }
                 else {
-                    Ext.MessageBox.alert('提示', result);
+                    Ext.MessageBox.alert('提示', r);
                 }
             }
         });
     </script>
-
 </head>
 <body>
     <form id="form1" runat="server">
     <div>
+    
     </div>
     </form>
 </body>
